@@ -1258,7 +1258,9 @@ public class LoptOptimizeJoinRule extends RelOptRule {
     } else {
       childFactorBuilder.addAll(leftTree.getTreeOrder());
     }
-    multiJoin.getChildFactors(rightTree, childFactorBuilder);
+    for (int child : rightTree.getTreeOrder()) {
+      childFactorBuilder.set(child);
+    }
 
     final ImmutableBitSet childFactor = childFactorBuilder.build();
     RexNode condition = null;

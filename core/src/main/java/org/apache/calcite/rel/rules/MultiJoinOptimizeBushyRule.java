@@ -205,9 +205,9 @@ public class MultiJoinOptimizeBushyRule extends RelOptRule {
         if (edge.factors.intersects(merged)) {
           ImmutableBitSet newEdgeFactors =
               ImmutableBitSet.builder(edge.factors)
-              .removeAll(newFactors)
-              .set(v)
-              .build();
+                  .removeAll(newFactors)
+                  .set(v)
+                  .build();
           assert newEdgeFactors.cardinality() == 2;
           final LoptMultiJoin.Edge newEdge =
               new LoptMultiJoin.Edge(edge.condition, newEdgeFactors,

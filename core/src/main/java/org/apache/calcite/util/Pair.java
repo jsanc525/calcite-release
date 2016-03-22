@@ -17,11 +17,11 @@
 package org.apache.calcite.util;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Iterators;
 
 import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -368,7 +368,7 @@ public class Pair<T1, T2>
       public Iterator<Pair<T, T>> iterator() {
         final Iterator<T> iterator = iterable.iterator();
         if (!iterator.hasNext()) {
-          return Iterators.emptyIterator();
+          return Collections.emptyIterator();
         }
         final T first = iterator.next();
         return new Iterator<Pair<T, T>>() {
@@ -408,7 +408,7 @@ public class Pair<T1, T2>
       public Iterator<Pair<T, T>> iterator() {
         final Iterator<T> iterator = iterable.iterator();
         if (!iterator.hasNext()) {
-          return Iterators.emptyIterator();
+          return Collections.emptyIterator();
         }
         final T first = iterator.next();
         return new Iterator<Pair<T, T>>() {
