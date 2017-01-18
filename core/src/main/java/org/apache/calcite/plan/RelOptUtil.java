@@ -63,6 +63,7 @@ import org.apache.calcite.rex.RexProgramBuilder;
 import org.apache.calcite.rex.RexShuttle;
 import org.apache.calcite.rex.RexUtil;
 import org.apache.calcite.rex.RexVisitorImpl;
+import org.apache.calcite.runtime.PredicateImpl;
 import org.apache.calcite.sql.SqlAggFunction;
 import org.apache.calcite.sql.SqlExplainLevel;
 import org.apache.calcite.sql.SqlKind;
@@ -109,8 +110,8 @@ public abstract class RelOptUtil {
   /** Predicate for whether a filter contains multisets or windowed
    * aggregates. */
   public static final Predicate<Filter> FILTER_PREDICATE =
-      new Predicate<Filter>() {
-        public boolean apply(Filter filter) {
+      new PredicateImpl<Filter>() {
+        public boolean test(Filter filter) {
           return !(B
               && RexMultisetUtil.containsMultiset(filter.getCondition(), true)
               || RexOver.containsOver(filter.getCondition()));
@@ -120,8 +121,8 @@ public abstract class RelOptUtil {
   /** Predicate for whether a project contains multisets or windowed
    * aggregates. */
   public static final Predicate<Project> PROJECT_PREDICATE =
-      new Predicate<Project>() {
-        public boolean apply(Project project) {
+      new PredicateImpl<Project>() {
+        public boolean test(Project project) {
           return !(B
               && RexMultisetUtil.containsMultiset(project.getProjects(), true)
               || RexOver.containsOver(project.getProjects(), null));
@@ -131,8 +132,8 @@ public abstract class RelOptUtil {
   /** Predicate for whether a calc contains multisets or windowed
    * aggregates. */
   public static final Predicate<Calc> CALC_PREDICATE =
-      new Predicate<Calc>() {
-        public boolean apply(Calc calc) {
+      new PredicateImpl<Calc>() {
+        public boolean test(Calc calc) {
           return !(B
               && RexMultisetUtil.containsMultiset(calc.getProgram())
               || calc.getProgram().containsAggs());
