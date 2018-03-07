@@ -635,6 +635,11 @@ public class SqlDialect {
     return false;
   }
 
+  /** Returns whether this dialect supports window functions (OVER clause). */
+  public boolean supportsWindowFunctions() {
+    return true;
+  }
+
   /** Returns whether this dialect supports a given function or operator.
    * It only applies to built-in scalar functions and operators, since
    * user-defined functions and procedures should be read by JdbcSchema. */
