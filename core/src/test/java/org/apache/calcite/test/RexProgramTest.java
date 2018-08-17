@@ -1175,9 +1175,8 @@ public class RexProgramTest extends RexProgramBuilderBase {
     checkSimplify2(div(vInt(), nullInt), "null", "false");
 
     // "(not x) is null" to "x is null"
-    // CALCITE-2469 will fix this
-    // checkSimplify(isNull(not(vBool())), "IS NULL(?0.bool0)");
-    // checkSimplify(isNull(not(vBoolNotNull())), "false");
+    checkSimplify(isNull(not(vBool())), "IS NULL(?0.bool0)");
+    checkSimplify(isNull(not(vBoolNotNull())), "false");
 
     // "(not x) is not null" to "x is not null"
     checkSimplify(isNotNull(not(vBool())), "IS NOT NULL(?0.bool0)");
