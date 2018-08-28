@@ -55,7 +55,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -579,6 +578,26 @@ public class RexProgramTest extends RexProgramBuilderBase {
             case_(isNotNull(i0), i0, i1), c01),
         is(true));
 
+  }
+
+  @Test public void xAndNotX() {
+    checkSimplify2(
+        and(vBool(), not(vBool()),
+            vBool(1), not(vBool(1))),
+        "AND(null, IS NULL(?0.bool0), IS NULL(?0.bool1))",
+        "false");
+
+    checkSimplify2(
+        and(vBool(),
+            vBool(1), not(vBool(1))),
+        "AND(?0.bool0, null, IS NULL(?0.bool1))",
+        "false");
+
+    checkSimplify2(
+        and(vBool(), not(vBool()),
+            vBoolNotNull(1), not(vBoolNotNull(1))),
+        "false",
+        "false");
   }
 
   /** Unit test for {@link org.apache.calcite.rex.RexUtil#isLosslessCast(RexNode)}. */
@@ -1570,7 +1589,6 @@ public class RexProgramTest extends RexProgramBuilderBase {
         "false");
   }
 
-  @Ignore
   @Test public void testSimplifyAnd3() {
     final RelDataType boolType = typeFactory.createSqlType(SqlTypeName.BOOLEAN);
     final RelDataType rowType = typeFactory.builder()
@@ -1584,7 +1602,7 @@ public class RexProgramTest extends RexProgramBuilderBase {
     checkSimplify2(
         and(aRef,
             not(aRef)),
-        "a is null and null",
+        "AND(null, IS NULL(?0.a))",
         "false");
   }
 
