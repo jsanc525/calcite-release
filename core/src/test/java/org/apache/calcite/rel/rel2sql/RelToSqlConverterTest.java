@@ -26,6 +26,7 @@ import org.apache.calcite.plan.hep.HepProgram;
 import org.apache.calcite.plan.hep.HepProgramBuilder;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.rules.UnionMergeRule;
+import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.runtime.FlatLists;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlDialect;
@@ -35,14 +36,17 @@ import org.apache.calcite.sql.dialect.CalciteSqlDialect;
 import org.apache.calcite.sql.dialect.HiveSqlDialect;
 import org.apache.calcite.sql.dialect.JethroDataSqlDialect;
 import org.apache.calcite.sql.dialect.MysqlSqlDialect;
+import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.test.CalciteAssert;
+import org.apache.calcite.test.RelBuilderTest;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 import org.apache.calcite.tools.Planner;
 import org.apache.calcite.tools.Program;
 import org.apache.calcite.tools.Programs;
+import org.apache.calcite.tools.RelBuilder;
 import org.apache.calcite.tools.RuleSet;
 import org.apache.calcite.tools.RuleSets;
 
@@ -76,6 +80,9 @@ public class RelToSqlConverterTest {
           .withConvertTableAccess(false)
           .withExpand(false)
           .build();
+
+  final RelBuilder builder = RelBuilder.create(RelBuilderTest.config().build());
+  final RelBuilder empScan = builder.scan("EMP");
 
   /** Initiates a test case with a given SQL query. */
   private Sql sql(String sql) {
@@ -355,6 +362,71 @@ public class RelToSqlConverterTest {
         + "FROM \"foodmart\".\"product\"\n"
         + "ORDER BY \"net_weight\", \"gross_weight\" DESC, \"low_fat\"";
     sql(query).ok(expected);
+  }
+
+  private String unparseRelTree(RelNode root) {
+    SqlDialect dialect = SqlDialect.DatabaseProduct.CALCITE.getDialect();
+    final RelToSqlConverter converter = new RelToSqlConverter(dialect);
+    final SqlNode sqlNode = converter.visitChild(0, root).asStatement();
+    return sqlNode.toSqlString(dialect).getSql();
+  }
+
+  /**
+   * Tests that IN can be un-parsed.
+   *
+   * <p>This cannot be tested using "sql", because because Calcite's SQL parser
+   * replaces INs with ORs or sub-queries.
+   */
+  @Test public void testUnparseIn1() {
+    final RexNode condition =
+        builder.call(SqlStdOperatorTable.IN, builder.field("DEPTNO"),
+            builder.literal(21));
+    final String sql = unparseRelTree(empScan.filter(condition).build());
+    final String expectedSql = "SELECT *\n"
+        + "FROM \"scott\".\"EMP\"\n"
+        + "WHERE \"DEPTNO\" IN (21)";
+    assertThat(sql, isLinux(expectedSql));
+  }
+
+  @Test public void testUnparseIn2() {
+    final RexNode filter =
+        builder.call(SqlStdOperatorTable.IN, builder.field("DEPTNO"),
+            builder.literal(20), builder.literal(21));
+    final String sql = unparseRelTree(empScan.filter(filter).build());
+    final String expectedSql = "SELECT *\n"
+        + "FROM \"scott\".\"EMP\"\n"
+        + "WHERE \"DEPTNO\" IN (20, 21)";
+    assertThat(sql, isLinux(expectedSql));
+  }
+
+  @Test public void testUnparseInStruct1() {
+    final RexNode condition =
+        builder.call(SqlStdOperatorTable.IN,
+            builder.call(SqlStdOperatorTable.ROW, builder.field("DEPTNO"),
+                builder.field("JOB")),
+            builder.call(SqlStdOperatorTable.ROW, builder.literal(1),
+                builder.literal("PRESIDENT")));
+    final String sql = unparseRelTree(empScan.filter(condition).build());
+    final String expectedSql = "SELECT *\n"
+        + "FROM \"scott\".\"EMP\"\n"
+        + "WHERE ROW(\"DEPTNO\", \"JOB\") IN (ROW(1, 'PRESIDENT'))";
+    assertThat(sql, isLinux(expectedSql));
+  }
+
+  @Test public void testUnparseInStruct2() {
+    final RexNode condition =
+        builder.call(SqlStdOperatorTable.IN,
+            builder.call(SqlStdOperatorTable.ROW, builder.field("DEPTNO"),
+                builder.field("JOB")),
+            builder.call(SqlStdOperatorTable.ROW, builder.literal(1),
+                builder.literal("PRESIDENT")),
+            builder.call(SqlStdOperatorTable.ROW, builder.literal(2),
+                builder.literal("PRESIDENT")));
+    final String sql = unparseRelTree(empScan.filter(condition).build());
+    final String expectedSql = "SELECT *\n"
+        + "FROM \"scott\".\"EMP\"\n"
+        + "WHERE ROW(\"DEPTNO\", \"JOB\") IN (ROW(1, 'PRESIDENT'), ROW(2, 'PRESIDENT'))";
+    assertThat(sql, isLinux(expectedSql));
   }
 
   @Test public void testSelectQueryWithLimitClause() {
