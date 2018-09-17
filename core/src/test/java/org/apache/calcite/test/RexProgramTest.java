@@ -1157,6 +1157,33 @@ public class RexProgramTest extends RexProgramBuilderBase {
     checkSimplify(gt(iRef, hRef), ">(?0.i, ?0.h)");
   }
 
+  @Test public void simplifyStrong() {
+    checkSimplify2(ge(trueLiteral, falseLiteral), "true", "true");
+    checkSimplify2(ge(trueLiteral, nullBool), "null", "false");
+    checkSimplify2(ge(nullBool, nullBool), "null", "false");
+    checkSimplify2(gt(trueLiteral, nullBool), "null", "false");
+    checkSimplify2(le(trueLiteral, nullBool), "null", "false");
+    checkSimplify2(lt(trueLiteral, nullBool), "null", "false");
+
+    checkSimplify2(not(nullBool), "null", "false");
+    checkSimplify2(ne(vInt(), nullBool), "null", "false");
+    checkSimplify2(eq(vInt(), nullBool), "null", "false");
+
+    checkSimplify2(plus(vInt(), nullInt), "null", "false");
+    checkSimplify2(sub(vInt(), nullInt), "null", "false");
+    checkSimplify2(mul(vInt(), nullInt), "null", "false");
+    checkSimplify2(div(vInt(), nullInt), "null", "false");
+
+    // "(not x) is null" to "x is null"
+    // CALCITE-2469 will fix this
+    // checkSimplify(isNull(not(vBool())), "IS NULL(?0.bool0)");
+    // checkSimplify(isNull(not(vBoolNotNull())), "false");
+
+    // "(not x) is not null" to "x is not null"
+    checkSimplify(isNotNull(not(vBool())), "IS NOT NULL(?0.bool0)");
+    checkSimplify(isNotNull(not(vBoolNotNull())), "true");
+  }
+
   @Test public void testSimplifyFilter() {
     final RelDataType booleanType =
         typeFactory.createSqlType(SqlTypeName.BOOLEAN);
@@ -2009,6 +2036,13 @@ public class RexProgramTest extends RexProgramBuilderBase {
             ImmutableList.of(eq(aRef, literal1),
                 eq(aRef, literal2)));
     assertThat(getString(map3), is("{1=?0.a, 2=?0.a}"));
+  }
+
+  @Test public void simplifyNull() {
+    checkSimplify2(nullBool, "null", "false");
+    // null int must not be simplified to false
+    checkSimplify(nullInt, "null");
+    checkSimplifyFilter(nullInt, "null");
   }
 
   /** Converts a map to a string, sorting on the string representation of its

@@ -27,6 +27,7 @@ import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.type.SqlTypeName;
+import org.apache.calcite.sql.type.SqlTypeUtil;
 import org.apache.calcite.util.Pair;
 import org.apache.calcite.util.Util;
 
@@ -56,6 +57,7 @@ public class RexSimplify {
   private final RelOptPredicateList predicates;
   final boolean unknownAsFalse;
   private final RexExecutor executor;
+  private final Strong strong;
 
   /**
    * Creates a RexSimplify.
@@ -71,6 +73,7 @@ public class RexSimplify {
     this.predicates = Preconditions.checkNotNull(predicates);
     this.unknownAsFalse = unknownAsFalse;
     this.executor = Preconditions.checkNotNull(executor);
+    this.strong = new Strong();
   }
 
   @Deprecated // to be removed before 2.0
@@ -133,6 +136,12 @@ public class RexSimplify {
    * @param e Expression to simplify
    */
   public RexNode simplify(RexNode e) {
+    if (strong.isNull(e)) {
+      if (unknownAsFalse && e.getType().getSqlTypeName() == SqlTypeName.BOOLEAN) {
+        return rexBuilder.makeLiteral(false);
+      }
+      return rexBuilder.makeNullLiteral(e.getType());
+    }
     switch (e.getKind()) {
     case AND:
       return simplifyAnd((RexCall) e);
@@ -206,7 +215,8 @@ public class RexSimplify {
     // "1 != '1'" is unchanged because the types are not the same.
     if (o0.isA(SqlKind.LITERAL)
         && o1.isA(SqlKind.LITERAL)
-        && o0.getType().equals(o1.getType())) {
+        && SqlTypeUtil.equalSansNullability(rexBuilder.getTypeFactory(),
+              o0.getType(), o1.getType())) {
       final C v0 = ((RexLiteral) o0).getValueAs(clazz);
       final C v1 = ((RexLiteral) o1).getValueAs(clazz);
       if (v0 == null || v1 == null) {
@@ -435,7 +445,7 @@ public class RexSimplify {
       final RexNode arg = ((RexCall) a).operands.get(0);
       return simplify(rexBuilder.makeCall(notKind, arg));
     }
-    RexNode a2 = simplify(a);
+    RexNode a2 = withUnknownAsFalse(false).simplify(a);
     if (a != a2) {
       return rexBuilder.makeCall(RexUtil.op(kind), ImmutableList.of(a2));
     }
