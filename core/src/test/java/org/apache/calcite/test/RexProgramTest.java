@@ -1155,6 +1155,8 @@ public class RexProgramTest extends RexProgramBuilderBase {
     checkSimplify(gt(hRef, hRef), "false");
     checkSimplify2(gt(iRef, iRef), ">(?0.i, ?0.i)", "false");
     checkSimplify(gt(iRef, hRef), ">(?0.i, ?0.h)");
+    // "null is null" to "true"
+    checkSimplify(isNull(nullBool), "true");
   }
 
   @Test public void simplifyStrong() {
