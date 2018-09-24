@@ -632,11 +632,11 @@ public class RexSimplify {
           notTerms.add(pair.e.getKey());
         }
       }
-      final RexNode disjunction = RexUtil.composeDisjunction(rexBuilder, terms);
+      RexNode disjunction = RexUtil.composeDisjunction(rexBuilder, terms);
       if (!call.getType().equals(disjunction.getType())) {
-        return rexBuilder.makeCast(call.getType(), disjunction);
+        disjunction = rexBuilder.makeCast(call.getType(), disjunction);
       }
-      return disjunction;
+      return simplify(disjunction);
     }
     if (newOperands.equals(operands)) {
       return call;
