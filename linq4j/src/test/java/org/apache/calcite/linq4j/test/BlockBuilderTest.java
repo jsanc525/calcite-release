@@ -78,6 +78,21 @@ public class BlockBuilderTest {
     b.add(Expressions.return_(null, Expressions.add(ONE, TWO)));
     assertEquals("{\n  return 4;\n}\n", b.toBlock().toString());
   }
+  /** CALCITE-2611: unknown on one side of an or may lead to uncompilable code */
+  @Test
+  public void testOptimizeBoxedFalseEqNull() {
+    BlockBuilder outer = new BlockBuilder();
+    outer.append(
+        Expressions.equal(
+            OptimizeShuttle.BOXED_FALSE_EXPR,
+            Expressions.constant(null)));
+
+    assertEquals("Expected to optimize Boolean.FALSE = null to false",
+        "{\n"
+            + "  return false;\n"
+            + "}\n",
+        Expressions.toString(outer.toBlock()));
+  }
 }
 
 // End BlockBuilderTest.java
