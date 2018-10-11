@@ -19,7 +19,7 @@ limitations under the License.
     <TestCase name="testCase">
         <Resource name="plan">
             <![CDATA[
-LogicalProject(EXPR$0=[CASE(=('a', 'a'), 1, null)])
+LogicalProject(EXPR$0=[1])
   LogicalValues(tuples=[[{ 0 }]])
 ]]>
         </Resource>
@@ -880,7 +880,7 @@ LogicalProject(NAME=[$0])
     </TestCase>
     <TestCase name="testOrder">
         <Resource name="sql">
-            <![CDATA[select empno from emp order by empno]]>
+            <![CDATA[select empno from emp order by empno, empno desc]]>
         </Resource>
         <Resource name="plan">
             <![CDATA[
@@ -1093,7 +1093,7 @@ LogicalProject(EMPNO=[$0], EXPR$1=[$1])
     <TestCase name="testOrderBySameExpr">
         <Resource name="sql">
             <![CDATA[select empno from emp, dept
-order by sal + empno desc, sal * empno, sal + empno]]>
+order by sal + empno desc, sal * empno, sal + empno desc]]>
         </Resource>
         <Resource name="plan">
             <![CDATA[
@@ -2020,7 +2020,7 @@ from dept]]>
         </Resource>
         <Resource name="plan">
             <![CDATA[
-LogicalProject(NAME=[$1], EXPR$1=[CASE(=($2, 0), false, IS NOT NULL($6), true, <($3, $2), null, false)])
+LogicalProject(NAME=[$1], EXPR$1=[OR(AND(IS NOT NULL($6), <>($2, 0)), AND(<($3, $2), null, <>($2, 0), IS NULL($6)))])
   LogicalJoin(condition=[=($4, $5)], joinType=[left])
     LogicalProject($f0=[$0], $f1=[$1], $f2=[$2], $f3=[$3], $f4=[$0])
       LogicalJoin(condition=[true], joinType=[inner])
@@ -2268,7 +2268,7 @@ LogicalSort(sort0=[$1], dir0=[ASC])
     <TestCase name="testGroupingSetsWithRollup">
         <Resource name="sql">
             <![CDATA[select deptno, ename, sum(sal) from emp
-group by grouping sets (rollup(deptno), (ename, deptno))
+group by grouping sets ( rollup(deptno), (ename, deptno))
 order by 2]]>
         </Resource>
         <Resource name="plan">
@@ -2283,7 +2283,7 @@ LogicalSort(sort0=[$1], dir0=[ASC])
     <TestCase name="testGroupingSetsWithCube">
         <Resource name="sql">
             <![CDATA[select deptno, ename, sum(sal) from emp
-group by grouping sets ((deptno), cube(ename, deptno))
+group by grouping sets ( (deptno), CUBE(ename, deptno))
 order by 2]]>
         </Resource>
         <Resource name="plan">
@@ -2298,7 +2298,7 @@ LogicalSort(sort0=[$1], dir0=[ASC])
     <TestCase name="testGroupingSetsWithRollupCube">
         <Resource name="sql">
             <![CDATA[select deptno, ename, sum(sal) from emp
-group by grouping sets (cube(deptno), rollup(ename, deptno))
+group by grouping sets ( CUBE(deptno), ROLLUP(ename, deptno))
 order by 2]]>
         </Resource>
         <Resource name="plan">
@@ -2310,7 +2310,6 @@ LogicalSort(sort0=[$1], dir0=[ASC])
 ]]>
         </Resource>
     </TestCase>
-
     <TestCase name="testDuplicateGroupingSets">
         <Resource name="sql">
             <![CDATA[select sum(sal) from emp

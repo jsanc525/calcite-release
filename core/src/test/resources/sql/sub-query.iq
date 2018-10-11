@@ -32,7 +32,7 @@ where t1.x not in (select t2.x from t2);
 (0 rows)
 
 !ok
-EnumerableCalc(expr#0..4=[{inputs}], expr#5=[0], expr#6=[=($t1, $t5)], expr#7=[false], expr#8=[IS NOT NULL($t4)], expr#9=[true], expr#10=[IS NULL($t0)], expr#11=[null], expr#12=[<($t2, $t1)], expr#13=[CASE($t6, $t7, $t8, $t9, $t10, $t11, $t12, $t9, $t7)], expr#14=[NOT($t13)], EXPR$0=[$t0], $condition=[$t14])
+EnumerableCalc(expr#0..4=[{inputs}], expr#5=[IS NULL($t4)], expr#6=[0], expr#7=[=($t1, $t6)], expr#8=[OR($t5, $t7)], expr#9=[IS NOT NULL($t0)], expr#10=[IS NOT NULL($t4)], expr#11=[OR($t9, $t7, $t10)], expr#12=[>=($t2, $t1)], expr#13=[IS NULL($t0)], expr#14=[OR($t12, $t7, $t10, $t13)], expr#15=[AND($t8, $t11, $t14)], EXPR$0=[$t0], $condition=[$t15])
   EnumerableJoin(condition=[=($0, $3)], joinType=[left])
     EnumerableJoin(condition=[true], joinType=[inner])
       EnumerableUnion(all=[true])
@@ -40,20 +40,20 @@ EnumerableCalc(expr#0..4=[{inputs}], expr#5=[0], expr#6=[=($t1, $t5)], expr#7=[f
           EnumerableValues(tuples=[[{ 0 }]])
         EnumerableCalc(expr#0=[{inputs}], expr#1=[2], EXPR$0=[$t1])
           EnumerableValues(tuples=[[{ 0 }]])
-        EnumerableCalc(expr#0=[{inputs}], expr#1=[true], expr#2=[null], expr#3=[3], expr#4=[CASE($t1, $t2, $t3)], EXPR$0=[$t4])
+        EnumerableCalc(expr#0=[{inputs}], expr#1=[null], EXPR$0=[$t1])
           EnumerableValues(tuples=[[{ 0 }]])
       EnumerableAggregate(group=[{}], c=[COUNT()], ck=[COUNT($0)])
         EnumerableUnion(all=[true])
           EnumerableCalc(expr#0=[{inputs}], expr#1=[1], EXPR$0=[$t1])
             EnumerableValues(tuples=[[{ 0 }]])
-          EnumerableCalc(expr#0=[{inputs}], expr#1=[true], expr#2=[null], expr#3=[3], expr#4=[CASE($t1, $t2, $t3)], EXPR$0=[$t4])
+          EnumerableCalc(expr#0=[{inputs}], expr#1=[null], EXPR$0=[$t1])
             EnumerableValues(tuples=[[{ 0 }]])
     EnumerableAggregate(group=[{0, 1}])
       EnumerableCalc(expr#0=[{inputs}], expr#1=[true], proj#0..1=[{exprs}])
         EnumerableUnion(all=[true])
           EnumerableCalc(expr#0=[{inputs}], expr#1=[1], EXPR$0=[$t1])
             EnumerableValues(tuples=[[{ 0 }]])
-          EnumerableCalc(expr#0=[{inputs}], expr#1=[true], expr#2=[null], expr#3=[3], expr#4=[CASE($t1, $t2, $t3)], EXPR$0=[$t4])
+          EnumerableCalc(expr#0=[{inputs}], expr#1=[null], EXPR$0=[$t1])
             EnumerableValues(tuples=[[{ 0 }]])
 !plan
 
