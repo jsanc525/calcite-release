@@ -594,7 +594,6 @@ public class RexSimplify {
       return call;
     }
     RexNode retNode = rexBuilder.makeCall(SqlStdOperatorTable.CASE, newOperands);
-    assert sameTypeOrNarrowsNullability(branchType, retNode.getType()) : "Unexpected type change.";
     return retNode;
   }
 
