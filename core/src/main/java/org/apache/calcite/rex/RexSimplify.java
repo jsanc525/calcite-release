@@ -726,6 +726,7 @@ public class RexSimplify {
       safeOps.add(SqlKind.PLUS);
       safeOps.add(SqlKind.MINUS);
       safeOps.add(SqlKind.TIMES);
+      safeOps.add(SqlKind.DIVIDE);
       safeOps.add(SqlKind.IS_FALSE);
       safeOps.add(SqlKind.IS_NOT_FALSE);
       safeOps.add(SqlKind.IS_TRUE);
