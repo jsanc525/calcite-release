@@ -1761,8 +1761,9 @@ public class RexProgramTest extends RexProgramBuilderBase {
         eq(div(literal(3), vIntNotNull()), literal(11)), vInt(0),
         vInt(1));
     // expectation here is that the 2 branches are not merged.
+    // NOTE: division restriction lifted because hive can divide by 0
     checkSimplify(caseNode,
-        "CASE(?0.bool0, ?0.int0, =(/(3, ?0.notNullInt0), 11), ?0.int0, ?0.int1)");
+        "CASE(OR(?0.bool0, =(/(3, ?0.notNullInt0), 11)), ?0.int0, ?0.int1)");
   }
 
   /* case value branch contains division */
@@ -1771,8 +1772,9 @@ public class RexProgramTest extends RexProgramBuilderBase {
         ne(vIntNotNull(), literal(0)),
         eq(div(literal(3), vIntNotNull()), literal(11)),
         falseLiteral);
+    // NOTE: division restriction lifted because hive can divide by 0
     checkSimplify(caseNode,
-        "CASE(<>(?0.notNullInt0, 0), =(/(3, ?0.notNullInt0), 11), false)");
+        "AND(<>(?0.notNullInt0, 0), =(/(3, ?0.notNullInt0), 11))");
   }
 
   /* case condition contains division */
@@ -1781,8 +1783,9 @@ public class RexProgramTest extends RexProgramBuilderBase {
         eq(vIntNotNull(), literal(0)), trueLiteral,
         gt(div(literal(3), vIntNotNull()), literal(1)), trueLiteral,
         falseLiteral);
+    // NOTE: division restriction lifted because hive can divide by 0
     checkSimplify(caseNode,
-        "CASE(=(?0.notNullInt0, 0), true, >(/(3, ?0.notNullInt0), 1), true, false)");
+        "OR(=(?0.notNullInt0, 0), >(/(3, ?0.notNullInt0), 1))");
   }
 
   @Test public void testSimplifyAnd() {

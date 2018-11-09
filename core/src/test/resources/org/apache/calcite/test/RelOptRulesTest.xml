@@ -8378,9 +8378,12 @@ LogicalProject(EMPNO=[$0], ENAME=[$1], JOB=[$2], MGR=[$3], HIREDATE=[$4], SAL=[$
         <Resource name="planAfter">
             <![CDATA[
 LogicalProject(EMPNO=[$0], ENAME=[$1], JOB=[$2], MGR=[$3], HIREDATE=[$4], SAL=[$5], COMM=[$6], DEPTNO=[$7], SLACKER=[$8])
-  LogicalFilter(condition=[AND(>($3, 0), CASE(>($3, 0), >(/($7, $3), 1), false))])
+  LogicalFilter(condition=[AND(>($3, 0), OR(AND(IS NOT NULL($3), >(/($7, $3), 1)), AND(null, IS NULL($3))))])
     LogicalTableScan(table=[[CATALOG, SALES, EMP]])
 ]]>
+        </Resource>
+        <Resource name="sql">
+            <![CDATA[select * from emp where MGR > 0 and case when MGR > 0 then deptno / MGR else null end > 1]]>
         </Resource>
     </TestCase>
 </Root>
