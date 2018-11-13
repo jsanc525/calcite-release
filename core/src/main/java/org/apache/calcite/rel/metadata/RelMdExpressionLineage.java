@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 /**
  * Default implementation of
@@ -400,7 +401,7 @@ public class RelMdExpressionLineage
    * @param mapping mapping
    * @return set of resulting expressions equivalent to the input expression
    */
-  protected static Set<RexNode> createAllPossibleExpressions(RexBuilder rexBuilder,
+  @Nullable protected static Set<RexNode> createAllPossibleExpressions(RexBuilder rexBuilder,
       RexNode expr, Map<RexInputRef, Set<RexNode>> mapping) {
     // Extract input fields referenced by expression
     final ImmutableBitSet predFieldsUsed = extractInputRefs(expr);
@@ -410,8 +411,13 @@ public class RelMdExpressionLineage
       return Sets.newHashSet(expr);
     }
 
-    return createAllPossibleExpressions(rexBuilder, expr, predFieldsUsed, mapping,
-        new HashMap<RexInputRef, RexNode>());
+    try {
+      return createAllPossibleExpressions(rexBuilder, expr, predFieldsUsed, mapping,
+          new HashMap<>());
+    } catch (UnsupportedOperationException e) {
+      // There may be a RexNode unsupported by RexCopier, just return null
+      return null;
+    }
   }
 
   private static Set<RexNode> createAllPossibleExpressions(RexBuilder rexBuilder,

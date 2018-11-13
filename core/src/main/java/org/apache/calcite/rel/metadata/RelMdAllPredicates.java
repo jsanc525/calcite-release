@@ -147,9 +147,12 @@ public class RelMdAllPredicates
     }
 
     // Replace with new expressions and return union of predicates
-    return predsBelow.union(rexBuilder,
-        RelOptPredicateList.of(rexBuilder,
-            RelMdExpressionLineage.createAllPossibleExpressions(rexBuilder, pred, mapping)));
+    final Set<RexNode> allExprs =
+        RelMdExpressionLineage.createAllPossibleExpressions(rexBuilder, pred, mapping);
+    if (allExprs == null) {
+      return null;
+    }
+    return predsBelow.union(rexBuilder, RelOptPredicateList.of(rexBuilder, allExprs));
   }
 
   /**
@@ -228,9 +231,12 @@ public class RelMdAllPredicates
     }
 
     // Replace with new expressions and return union of predicates
-    return newPreds.union(rexBuilder,
-        RelOptPredicateList.of(rexBuilder,
-            RelMdExpressionLineage.createAllPossibleExpressions(rexBuilder, pred, mapping)));
+    final Set<RexNode> allExprs =
+        RelMdExpressionLineage.createAllPossibleExpressions(rexBuilder, pred, mapping);
+    if (allExprs == null) {
+      return null;
+    }
+    return newPreds.union(rexBuilder, RelOptPredicateList.of(rexBuilder, allExprs));
   }
 
   /**
