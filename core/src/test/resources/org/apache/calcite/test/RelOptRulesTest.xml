@@ -5781,6 +5781,23 @@ LogicalProject(NEWCOL=[1E0])
 ]]>
         </Resource>
     </TestCase>
+    <TestCase name="testReduceCaseNullabilityChange">
+        <Resource name="sql">
+            <![CDATA[select case when empno = 1 then 1 when 1 IS NOT NULL then 2 else null end as qx from emp]]>
+        </Resource>
+        <Resource name="planBefore">
+            <![CDATA[
+LogicalProject(QX=[CASE(=($0, 1), 1, IS NOT NULL(1), 2, null)])
+  LogicalTableScan(table=[[CATALOG, SALES, EMP]])
+]]>
+        </Resource>
+        <Resource name="planAfter">
+            <![CDATA[
+LogicalProject(QX=[CAST(CASE(=($0, 1), 1, 2)):INTEGER])
+  LogicalTableScan(table=[[CATALOG, SALES, EMP]])
+]]>
+        </Resource>
+    </TestCase>
     <TestCase name="testReduceCastTimeUnchanged">
         <Resource name="sql">
             <![CDATA[select cast(time '12:34:56' as timestamp) from emp as e]]>
@@ -8378,7 +8395,7 @@ LogicalProject(EMPNO=[$0], ENAME=[$1], JOB=[$2], MGR=[$3], HIREDATE=[$4], SAL=[$
         <Resource name="planAfter">
             <![CDATA[
 LogicalProject(EMPNO=[$0], ENAME=[$1], JOB=[$2], MGR=[$3], HIREDATE=[$4], SAL=[$5], COMM=[$6], DEPTNO=[$7], SLACKER=[$8])
-  LogicalFilter(condition=[AND(>($3, 0), OR(AND(IS NOT NULL($3), >(/($7, $3), 1)), AND(null, IS NULL($3))))])
+  LogicalFilter(condition=[AND(>($3, 0), >(/($7, $3), 1))])
     LogicalTableScan(table=[[CATALOG, SALES, EMP]])
 ]]>
         </Resource>
