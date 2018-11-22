@@ -699,6 +699,17 @@ public class RexProgramTest extends RexProgramBuilderBase {
                 varCharType11, rexBuilder.makeInputRef(varCharType10, 0))), is(true));
   }
 
+  @Test public void removeRedundantCast() {
+    checkSimplify(cast(vInt(), nullable(tInt())), "?0.int0");
+    checkSimplifyUnchanged(cast(vInt(), tInt()));
+    checkSimplify(cast(vIntNotNull(), nullable(tInt())), "?0.notNullInt0");
+    checkSimplify(cast(vIntNotNull(), tInt()), "?0.notNullInt0");
+
+    // Nested int int cast is removed
+    checkSimplify(cast(cast(vVarchar(), tInt()), tInt()),
+        "CAST(?0.varchar0):INTEGER NOT NULL");
+    checkSimplifyUnchanged(cast(cast(vVarchar(), tInt()), tVarchar()));
+  }
   /** Unit test for {@link org.apache.calcite.rex.RexUtil#toCnf}. */
   @Test public void testCnf() {
     final RelDataType booleanType =
@@ -2043,6 +2054,13 @@ public class RexProgramTest extends RexProgramBuilderBase {
         "2011-07-19 18:23:45");
     checkSimplify(cast(literalTimeLTZ, timestampLTZType),
         "2011-07-20 01:23:45");
+  }
+
+  @Test public void testRemovalOfNullabilityWideningCast() {
+    RexNode expr = cast(isTrue(vBoolNotNull()), tBoolean(true));
+    assertThat(expr.getType().isNullable(), is(true));
+    RexNode result = simplify.withUnknownAsFalse(false).simplify(expr);
+    assertThat(result.getType().isNullable(), is(false));
   }
 
   @Test public void testCompareTimestampWithTimeZone() {

@@ -327,7 +327,7 @@ public class RexProgramBuilder {
     final RexSimplify simplify =
         new RexSimplify(rexBuilder, RelOptPredicateList.EMPTY, false,
             RexUtil.EXECUTOR);
-    expr = simplify.simplify(expr);
+    expr = simplify.simplifyPreservingType(expr);
 
     RexLocalRef ref;
     final Pair<String, String> key;
