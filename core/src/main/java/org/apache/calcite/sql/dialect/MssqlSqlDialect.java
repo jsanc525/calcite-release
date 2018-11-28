@@ -83,6 +83,10 @@ public class MssqlSqlDialect extends SqlDialect {
     }
   }
 
+  @Override public boolean supportsCharSet() {
+    return false;
+  }
+
   /**
    * Unparses datetime floor for Microsoft SQL Server.
    * There is no TRUNC function, so simulate this using calls to CONVERT.
