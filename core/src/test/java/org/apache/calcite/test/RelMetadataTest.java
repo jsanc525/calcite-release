@@ -90,6 +90,7 @@ import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 import org.apache.calcite.tools.RelBuilder;
+import org.apache.calcite.tools.RelBuilder.AggCall;
 import org.apache.calcite.util.BuiltInMethod;
 import org.apache.calcite.util.ImmutableBitSet;
 import org.apache.calcite.util.ImmutableIntList;
@@ -2417,6 +2418,16 @@ public class RelMetadataTest extends SqlToRelTestBase {
       return false;
     }
   };
+
+  @Test public void testEmptyAggregateNotCausesException() throws Exception {
+    final FrameworkConfig config = RelBuilderTest.config().build();
+    final RelBuilder builder = RelBuilder.create(config);
+    RelMetadataQuery mq = RelMetadataQuery.instance();
+    RelNode agg = builder
+        .scan("EMP")
+        .aggregate(builder.groupKey(), Collections.<AggCall>emptyList()).build();
+    mq.getTableOrigin(agg);
+  }
 
   @Test public void testGetPredicatesForJoin() throws Exception {
     final FrameworkConfig config = RelBuilderTest.config().build();
