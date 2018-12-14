@@ -119,6 +119,7 @@ public class SqlDialect {
           .add(SqlStdOperatorTable.POWER)
           .add(SqlStdOperatorTable.RAND)
           .add(SqlStdOperatorTable.ROUND)
+          .add(SqlStdOperatorTable.ROW)
           .add(SqlStdOperatorTable.SIN)
           .add(SqlStdOperatorTable.SQRT)
           .add(SqlStdOperatorTable.SUBSTRING)
@@ -678,6 +679,7 @@ public class SqlDialect {
     case NVL:
     case OR:
     case PLUS:
+    case ROW:
     case TIMES:
       return true;
     default:
