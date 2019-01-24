@@ -487,36 +487,6 @@ public class JdbcAdapterTest {
             + "FROM \"foodmart\".\"expense_fact\"");
   }
 
-  /** Test case for
-   * <a href="https://issues.apache.org/jira/browse/CALCITE-2713">[CALCITE-2713]
-   * JDBC adapter may generate casts on PostgreSQL for VARCHAR type exceeding
-   * max length</a>. */
-  @Test public void testCastLongVarchar1() {
-    CalciteAssert
-        .model(JdbcTest.FOODMART_MODEL)
-        .enable(CalciteAssert.DB == CalciteAssert.DatabaseInstance.POSTGRESQL)
-        .query("select cast(\"store_id\" as VARCHAR(10485761))\n"
-            + " from \"expense_fact\"")
-        .runs()
-        .planHasSql("SELECT CAST(\"store_id\" AS VARCHAR(10485760))\n"
-            + "FROM \"foodmart\".\"expense_fact\"");
-  }
-
-  /** Test case for
-   * <a href="https://issues.apache.org/jira/browse/CALCITE-2713">[CALCITE-2713]
-   * JDBC adapter may generate casts on PostgreSQL for VARCHAR type exceeding
-   * max length</a>. */
-  @Test public void testCastLongVarchar2() {
-    CalciteAssert
-        .model(JdbcTest.FOODMART_MODEL)
-        .enable(CalciteAssert.DB == CalciteAssert.DatabaseInstance.POSTGRESQL)
-        .query("select cast(\"store_id\" as VARCHAR(175))\n"
-            + " from \"expense_fact\"")
-        .runs()
-        .planHasSql("SELECT CAST(\"store_id\" AS VARCHAR(175))\n"
-            + "FROM \"foodmart\".\"expense_fact\"");
-  }
-
   @Test public void testOverRowsBetweenBoundFollowingAndFollowing() {
     CalciteAssert
         .model(JdbcTest.FOODMART_MODEL)
