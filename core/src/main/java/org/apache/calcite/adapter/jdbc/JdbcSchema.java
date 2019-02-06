@@ -232,21 +232,11 @@ public class JdbcSchema implements Schema {
     try {
       connection = dataSource.getConnection();
       DatabaseMetaData metaData = connection.getMetaData();
-      String catalog;
-      String schema;
-      if (metaData.getJDBCMajorVersion() > 4
-          || (metaData.getJDBCMajorVersion() == 4 && metaData.getJDBCMinorVersion() >= 1)) {
-        // From JDBC 4.1, catalog and schema can be retrieved from the connection object,
-        // hence try to get it from there if it was not specified by user
-        catalog = Util.first(this.catalog, connection.getCatalog());
-        schema = Util.first(this.schema, connection.getSchema());
-      } else {
-        catalog = this.catalog;
-        schema = this.schema;
-      }
+      // From JDBC 4.1, catalog and schema can be retrieved from the connection object,
+      // hence try to get it from there if it was not specified by user.
       resultSet = metaData.getTables(
-          catalog,
-          schema,
+          Util.first(this.catalog, connection.getCatalog()),
+          Util.first(this.schema, getSchema(connection)),
           null,
           null);
       final ImmutableMap.Builder<String, JdbcTable> builder =
@@ -284,6 +274,25 @@ public class JdbcSchema implements Schema {
           "Exception while reading tables", e);
     } finally {
       close(connection, null, resultSet);
+    }
+  }
+
+  /**
+   * Delegates to {@link Connection#getSchema()} without throwing a {@link AbstractMethodError}.
+   * If the JDBC driver does not implement {@link Connection#getSchema()}, then return null.
+   *
+   * @param connection the receiver
+   * @return null for a JDBC 4 driver or a value per {@link Connection#getSchema()}.
+   * @throws SQLException
+   *             See {@link Connection#getSchema()}.
+   * @see Connection#getSchema()
+   */
+  private static String getSchema(final Connection connection) throws SQLException {
+    try {
+      return connection.getSchema();
+    } catch (final AbstractMethodError e) {
+      // do nothing
+      return null;
     }
   }
 
