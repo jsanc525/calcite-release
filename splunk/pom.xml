@@ -20,12 +20,12 @@ limitations under the License.
   <parent>
     <groupId>org.apache.calcite</groupId>
     <artifactId>calcite</artifactId>
-    <version>1.2.0-incubating</version>
+    <version>1.2.0.2.5.3.163-2</version>
   </parent>
 
   <artifactId>calcite-splunk</artifactId>
   <packaging>jar</packaging>
-  <version>1.2.0-incubating</version>
+  <version>1.2.0.2.5.3.163-2</version>
   <name>Calcite Splunk</name>
   <description>Splunk adapter for Calcite; also a JDBC driver for Splunk</description>
 
