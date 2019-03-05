@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache</groupId>
@@ -27,7 +27,7 @@ limitations under the License.
   <groupId>org.apache.calcite</groupId>
   <artifactId>calcite</artifactId>
   <packaging>pom</packaging>
-  <version>1.17.0-SNAPSHOT</version>
+  <version>1.16.0.3.1.0.13-3</version>
 
   <!-- More project information. -->
   <name>Calcite</name>
@@ -58,7 +58,7 @@ limitations under the License.
 
     <!-- This list is in alphabetical order. -->
     <airlift-tpch.version>0.1</airlift-tpch.version>
-    <avatica.version>1.11.0</avatica.version>
+    <avatica.version>1.10.0.3.1.0.13-3</avatica.version>
     <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
     <cassandra-driver-core.version>3.4.0</cassandra-driver-core.version>
     <checksum-maven-plugin.version>1.2</checksum-maven-plugin.version>
@@ -1043,7 +1043,7 @@ limitations under the License.
         we do not want recompile the module every time. -->
       <id>skip-apache-licenses</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <activeByDefault>false</activeByDefault>
         <file><exists>target/maven-shared-archive-resources/META-INF/LICENSE</exists></file>
       </activation>
       <build>
