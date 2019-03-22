@@ -338,7 +338,7 @@ public class VolcanoPlanner extends AbstractRelOptPlanner {
     return latticeByName.get(table.getQualifiedName());
   }
 
-  private void registerMaterializations() {
+  protected void registerMaterializations() {
     // Avoid using materializations while populating materializations!
     final CalciteConnectionConfig config =
         context.unwrap(CalciteConnectionConfig.class);
