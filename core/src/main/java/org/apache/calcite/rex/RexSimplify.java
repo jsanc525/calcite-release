@@ -478,14 +478,11 @@ public class RexSimplify {
   }
 
   private RexNode simplifyIsNotNull(RexNode a) {
-    if (!a.getType().isNullable() && isSafeExpression(a)) {
+    if (!a.getType().isNullable()) {
       return rexBuilder.makeLiteral(true);
     }
     if (predicates.pulledUpPredicates.contains(a)) {
       return rexBuilder.makeLiteral(true);
-    }
-    if (a.getKind() == SqlKind.CAST) {
-      return null;
     }
     switch (Strong.policy(a.getKind())) {
     case NOT_NULL:
@@ -521,14 +518,11 @@ public class RexSimplify {
   }
 
   private RexNode simplifyIsNull(RexNode a) {
-    if (!a.getType().isNullable() && isSafeExpression(a)) {
+    if (!a.getType().isNullable()) {
       return rexBuilder.makeLiteral(false);
     }
     if (RexUtil.isNull(a)) {
       return rexBuilder.makeLiteral(true);
-    }
-    if (a.getKind() == SqlKind.CAST) {
-      return null;
     }
     switch (Strong.policy(a.getKind())) {
     case NOT_NULL:
@@ -746,7 +740,6 @@ public class RexSimplify {
       safeOps.add(SqlKind.NOT);
       safeOps.add(SqlKind.CASE);
       safeOps.add(SqlKind.LIKE);
-      safeOps.add(SqlKind.COALESCE);
     }
 
     @Override public Boolean visitInputRef(RexInputRef inputRef) {
