@@ -477,7 +477,7 @@ public class RelWriterTest {
 
     assertThat(s,
         isLinux("LogicalAggregate(group=[{0}], agg#0=[COUNT(DISTINCT $1)], agg#1=[COUNT()])\n"
-            + "  LogicalFilter(condition=[=($1, null:INTEGER)])\n"
+            + "  LogicalFilter(condition=[=($1, null)])\n"
             + "    LogicalTableScan(table=[[hr, emps]])\n"));
   }
 }
