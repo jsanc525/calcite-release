@@ -21,6 +21,7 @@ import org.apache.calcite.avatica.util.TimeUnitRange;
 import org.apache.calcite.config.NullCollation;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
+import org.apache.calcite.rel.type.RelDataTypeSystemImpl;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlDataTypeSpec;
@@ -41,16 +42,37 @@ import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.type.InferTypes;
 import org.apache.calcite.sql.type.OperandTypes;
 import org.apache.calcite.sql.type.ReturnTypes;
+import org.apache.calcite.sql.type.SqlTypeName;
 
 /**
  * A <code>SqlDialect</code> implementation for the MySQL database.
  */
 public class MysqlSqlDialect extends SqlDialect {
-  public static final SqlDialect DEFAULT =
-      new MysqlSqlDialect(EMPTY_CONTEXT
-          .withDatabaseProduct(DatabaseProduct.MYSQL)
-          .withIdentifierQuoteString("`")
-          .withNullCollation(NullCollation.LOW));
+
+  /** MySQL type system. */
+  public static final RelDataTypeSystem MYSQL_TYPE_SYSTEM =
+      new RelDataTypeSystemImpl() {
+        @Override public int getMaxPrecision(SqlTypeName typeName) {
+          switch (typeName) {
+          case CHAR:
+            return 255;
+          case VARCHAR:
+            return 65535;
+          case TIMESTAMP:
+            return 6;
+          default:
+            return super.getMaxPrecision(typeName);
+          }
+        }
+      };
+
+  public static final SqlDialect.Context DEFAULT_CONTEXT = SqlDialect.EMPTY_CONTEXT
+      .withDatabaseProduct(SqlDialect.DatabaseProduct.MYSQL)
+      .withIdentifierQuoteString("`")
+      .withDataTypeSystem(MYSQL_TYPE_SYSTEM)
+      .withNullCollation(NullCollation.LOW);
+
+  public static final SqlDialect DEFAULT = new MysqlSqlDialect(DEFAULT_CONTEXT);
 
   /** MySQL specific function. */
   public static final SqlFunction ISNULL_FUNCTION =
@@ -102,8 +124,13 @@ public class MysqlSqlDialect extends SqlDialect {
     switch (type.getSqlTypeName()) {
     case VARCHAR:
       // MySQL doesn't have a VARCHAR type, only CHAR.
+      int vcMaxPrecision = this.getTypeSystem().getMaxPrecision(SqlTypeName.CHAR);
+      int precision = type.getPrecision();
+      if (vcMaxPrecision > 0 && precision > vcMaxPrecision) {
+        precision = vcMaxPrecision;
+      }
       return new SqlDataTypeSpec(new SqlIdentifier("CHAR", SqlParserPos.ZERO),
-          type.getPrecision(), -1, null, null, SqlParserPos.ZERO);
+          precision, -1, null, null, SqlParserPos.ZERO);
     case INTEGER:
       return new SqlDataTypeSpec(new SqlIdentifier("_UNSIGNED", SqlParserPos.ZERO),
           type.getPrecision(), -1, null, null, SqlParserPos.ZERO);
