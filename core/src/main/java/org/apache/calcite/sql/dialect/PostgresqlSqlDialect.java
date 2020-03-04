@@ -32,15 +32,6 @@ import org.apache.calcite.sql.parser.SqlParserPos;
  * A <code>SqlDialect</code> implementation for the PostgreSQL database.
  */
 public class PostgresqlSqlDialect extends SqlDialect {
-
-  /** From htup_details.h in postgresql:
-   * MaxAttrSize is a somewhat arbitrary upper limit on the declared size of
-   * data fields of char(n) and similar types.  It need not have anything
-   * directly to do with the *actual* upper limit of varlena values, which
-   * is currently 1Gb (see TOAST structures in postgres.h).  I've set it
-   * at 10Mb which seems like a reasonable number --- tgl 8/6/00. */
-  private static final int MAX_ATTR_SIZE = 10 * 1024 * 1024;
-
   public static final SqlDialect DEFAULT =
       new PostgresqlSqlDialect(EMPTY_CONTEXT
           .withDatabaseProduct(DatabaseProduct.POSTGRESQL)
@@ -66,18 +57,6 @@ public class PostgresqlSqlDialect extends SqlDialect {
       // Postgres has a double type but it is named differently
       castSpec = "_double precision";
       break;
-    case VARCHAR:
-      // length for type varchar cannot exceed 10485760
-      if (type.getPrecision() > MAX_ATTR_SIZE) {
-        return new SqlDataTypeSpec(
-            type.getSqlIdentifier(),
-            MAX_ATTR_SIZE,
-            -1,
-            type.getCharset().name(),
-            null,
-            SqlParserPos.ZERO);
-      }
-      return super.getCastSpec(type);
     default:
       return super.getCastSpec(type);
     }
