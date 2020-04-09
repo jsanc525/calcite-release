@@ -1007,6 +1007,23 @@ public class RelOptRulesTest extends RelOptTestBase {
             + "and upper(ename) = 'FOO'");
   }
 
+  @Test void testSwapOuterJoinFieldAccess() {
+    HepProgram preProgram = new HepProgramBuilder()
+        .addMatchLimit(1)
+        .addRuleInstance(JoinProjectTransposeRule.LEFT_PROJECT_INCLUDE_OUTER)
+        .addRuleInstance(ProjectMergeRule.INSTANCE)
+        .build();
+    final HepProgram program = new HepProgramBuilder()
+        .addMatchLimit(1)
+        .addRuleInstance(JoinCommuteRule.SWAP_OUTER)
+        .addRuleInstance(ProjectMergeRule.INSTANCE)
+        .build();
+    final String sql = "select t1.name, e.ename\n"
+        + "from DEPT_NESTED as t1 left outer join sales.emp e\n"
+        + " on t1.skill.type = e.job";
+    sql(sql).withPre(preProgram).with(program).check();
+  }
+
   /** Test case for
    * <a href="https://issues.apache.org/jira/browse/CALCITE-1778">[CALCITE-1778]
    * Query with "WHERE CASE" throws AssertionError "Cast for just nullability
